@@ -1,2 +1,4 @@
 .nextflow*
 .nextflow/
+data/
+.*.sw*
