@@ -44,7 +44,7 @@ process bwa_index_ref {
   """
 }
 
-process trimgalore {
+process cutadapt {
   publishDir "$params.outdir/fastq/trimmed", mode:"$mode"
   
   tag "$sampleID"
@@ -55,7 +55,7 @@ process trimgalore {
   output:
     set (
       sampleID,
-      file("${sampleID}_trimmed.fastq.gz")
+      file("${sampleID}_trimmed_*.fastq.gz")
     ) into trimmed_fastq_to_align
     file "${sampleID}.trim.log" into cutadapt_to_multiqc  
 
