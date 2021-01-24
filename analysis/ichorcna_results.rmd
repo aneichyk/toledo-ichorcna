@@ -1,0 +1,44 @@
+---
+title: "Results of ichorCNA"
+author: "Tatsiana Aneichyk <aneichyk@independentdatalab.com>"
+output:
+    html_document:
+        toc: true
+        toc_depth: 4
+        theme: united
+date: "Last updated: `r format(Sys.time(), '%d %B, %Y')`"
+---
+
+
+```{r, echo = FALSE, results = "hide"}
+  workDir = "~/Projects/idl/clients/vhio-toledo/ichorcna"    
+  knitr::opts_knit$set(root.dir = workDir) 
+  knitr::opts_chunk$set(warning = FALSE, message = F)
+```
+
+```{r}
+library(tidyverse)
+
+paramFiles = list.files("results/ichorcna", pattern = "params.txt", recursive = T)
+
+ichorcna_res =  lapply(paramFiles, function(fileName){
+
+  res = read.table(file.path("results/ichorcna",fileName), 
+                   header = T, nrows = 1, sep = '\t')
+  res
+}) %>% do.call(rbind,.)
+
+
+ggplot(ichorcna_res[1:50,], aes(Sample, Tumor.Fraction)) + 
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  coord_flip()
+```
+
+```{r}
+
+```
+
+```{r}
+
+```

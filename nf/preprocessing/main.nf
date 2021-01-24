@@ -8,16 +8,6 @@ Channel
 mode = params.publish_dir_mode
 reference = defineReference()
 
-/*
-________________________________________________________________________________
-                            P R O C E S S E S
-________________________________________________________________________________
-*/
-// fastqc 
-// trimgalore  -> bwa_align -> picard_markDuplicates | -> samtools_bam_index   -> picard_picard_CollectWgsMetrics
-//                                                   | ------------------------->
-// bwa_index (if needed)
-
 process fastqc{
   
   tag "$sampleID"
@@ -63,16 +53,18 @@ process trimgalore {
     set sampleID, file(raw_fastq) from raw_fastq_to_qc
 
   output:
-  set (
-    sampleID,
-    file("${sampleID}_*_val_*.fq.gz")
-  ) into trimmed_fastq_to_align
-  file("${sampleID}_*_trimming_report.txt")
+    set (
+      sampleID,
+      file("${sampleID}_trimmed.fastq.gz")
+    ) into trimmed_fastq_to_align
+    file "${sampleID}.trim.log" into cutadapt_to_multiqc  
 
   script:
   """
-    trim_galore ${params.trimgalore_cmd_args} ${raw_fastq}
-    ls -la
+    cutadapt --cores 4 \
+        -o ${sampleID}_trimmed_R1.fastq.gz \
+        -p ${sampleID}_trimmed_R2.fastq.gz \
+        ${raw_fastq} > ${sampleID}.trim.log 
   """
 }
 
@@ -181,6 +173,7 @@ process multiqc {
   input:
     file ('fastqc/*') from fastqc_to_multiqc.collect().ifEmpty([])
     file ('CollectWgsMetrics/*') from picard_to_multiqc.collect().ifEmpty([])
+    file ('cutadapt/*') from cutadapt_to_multiqc.collect().ifEmpty([])
 
   output:
     file ("**")
